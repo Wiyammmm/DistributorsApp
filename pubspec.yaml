@@ -33,6 +33,8 @@ dependencies:
   flutter:
     sdk: flutter
   idle_detector_wrapper: ^1.0.0
+  intl_phone_number_input: ^0.7.4
+  sticky_headers: ^0.3.0+2
 
 dev_dependencies:
   flutter_lints: ^2.0.0

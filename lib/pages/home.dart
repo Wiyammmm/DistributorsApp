@@ -1,6 +1,8 @@
 import 'package:distributorsapp/components/color.dart';
 import 'package:distributorsapp/components/template.dart';
 import 'package:distributorsapp/pages/checkbalance.dart';
+import 'package:distributorsapp/pages/load.dart';
+import 'package:distributorsapp/pages/transactionhistory.dart';
 import 'package:flutter/material.dart';
 
 import '../components/widgets.dart';
@@ -98,6 +100,7 @@ class _HomePageState extends State<HomePage> {
                               homeWidget(
                                 imageName: "cashin.png",
                                 label: "Cash In",
+                                isAvailable: false,
                                 thisfunction: () {
                                   print('cashin page');
                                 },
@@ -105,7 +108,13 @@ class _HomePageState extends State<HomePage> {
                               homeWidget(
                                 imageName: "load.png",
                                 label: "Load",
+                                isAvailable: true,
                                 thisfunction: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => LoadPage()),
+                                  );
                                   print('loadpage');
                                 },
                               ),
@@ -118,13 +127,21 @@ class _HomePageState extends State<HomePage> {
                               homeWidget(
                                 imageName: "transactionhistory.png",
                                 label: "Transaction History",
+                                isAvailable: true,
                                 thisfunction: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            TransactionHistoryPage()),
+                                  );
                                   print('Transaction History');
                                 },
                               ),
                               homeWidget(
                                 imageName: "checkbalance.png",
                                 label: "Check Balance",
+                                isAvailable: true,
                                 thisfunction: () {
                                   Navigator.push(
                                     context,
