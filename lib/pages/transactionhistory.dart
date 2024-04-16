@@ -1,8 +1,11 @@
+import 'package:distributorsapp/backend/get/getValueServices.dart';
+import 'package:distributorsapp/backend/httprequest/httprequest.dart';
 import 'package:distributorsapp/components/color.dart';
 import 'package:distributorsapp/components/template.dart';
 import 'package:distributorsapp/components/widgets.dart';
 import 'package:distributorsapp/pages/home.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class TransactionHistoryPage extends StatefulWidget {
   const TransactionHistoryPage({super.key});
@@ -12,52 +15,91 @@ class TransactionHistoryPage extends StatefulWidget {
 }
 
 class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
+  HttprequestService httprequestService = HttprequestService();
+  GetValueServices getValueServices = GetValueServices();
+  final _myBox = Hive.box('myBox');
   bool isCashInTransaction = true;
-  List<Map<String, dynamic>> transactionList = [
-    {
-      "_id": "2",
-      "amount": 500,
-      "transactionType": "cashin",
-      "date": "2021-05-21 02:54 pm",
-      "sNo": "XXXXXX",
-    },
-    {
-      "_id": "1",
-      "amount": 150.50,
-      "transactionType": "cashin",
-      "date": "2021-05-21 02:54 pm",
-      "sNo": "XXXXXX",
-    },
-    {
-      "_id": "1",
-      "amount": 500,
-      "transactionType": "load",
-      "date": "2021-05-21 02:54 pm",
-      "name": "Juan Dela Cruz",
-      "loadType": "filipayapp",
-    },
-    {
-      "_id": "1",
-      "amount": 1000,
-      "transactionType": "load",
-      "date": "2021-05-21 02:54 pm",
-      "name": "John Doe",
-      "loadType": "card",
-    },
-    {
-      "_id": "1",
-      "amount": 1000,
-      "transactionType": "load",
-      "date": "2021-05-21 02:54 pm",
-      "name": "John Doe",
-      "loadType": "card",
-    }
+  Map<String, dynamic> userInfo = {};
+  var transactionList = [
+    // {
+    //   "_id": "2"
+    //   "amount": 500,
+    //   "transactionType": "cashin",
+    //   "date": "2021-05-21 02:54 pm",
+    //   "sn": "XXXXXX",
+    // },
+    // {
+    //   "_id": "1",
+    //   "amount": 150.50,
+    //   "transactionType": "cashin",
+    //   "date": "2021-05-21 02:54 pm",
+    //   "sn": "XXXXXX",
+    // },
+    // {
+    //   "_id": "1",
+    //   "amount": 500,
+    //   "transactionType": "load",
+    //   "date": "2021-05-21 02:54 pm",
+    //   "name": "Juan Dela Cruz",
+    //   "loadType": "filipayapp",
+    // },
+    // {
+    //   "_id": "1",
+    //   "amount": 1000,
+    //   "transactionType": "load",
+    //   "date": "2021-05-21 02:54 pm",
+    //   "name": "John Doe",
+    //   "loadType": "card",
+    // },
+    // {
+    //   "_id": "1",
+    //   "amount": 1000,
+    //   "transactionType": "load",
+    //   "date": "2021-05-21 02:54 pm",
+    //   "name": "John Doe",
+    //   "loadType": "card",
+    // }
   ];
+
+  @override
+  void initState() {
+    _getTransactionHistory();
+    // TODO: implement initState
+
+    super.initState();
+  }
+
+  Future<void> _getTransactionHistory() async {
+    // Set state to trigger rebuild
+    userInfo = _myBox.get('userInfo');
+    final responseTransactionHistory =
+        await httprequestService.getTransactionHistory("${userInfo['_id']}");
+    setState(() {
+      try {
+        if (responseTransactionHistory['messages'][0]['code'].toString() ==
+            "0") {
+          transactionList = responseTransactionHistory['response'];
+          print('transactionList: $transactionList');
+        }
+      } catch (e) {
+        print('transactionList error:');
+        print(e);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return pageTemplate(
         thiswidget: Column(children: [
-          appBardarkblueWidget(title: "Transaction History"),
+          appBardarkblueWidget(
+              title: "Transaction History",
+              thisFunction: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                );
+              }),
           Container(
             decoration: BoxDecoration(
               boxShadow: [
@@ -201,20 +243,20 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'PHP ${double.parse(transactionList[index]['amount'].toString()).toStringAsFixed(2)}',
+                                          'PHP ${double.parse(transactionList[index]['snNewBalance'].toString()) - double.parse(transactionList[index]['snPreviousBalance'].toString())}',
                                           style: TextStyle(
                                               fontWeight: FontWeight.bold),
                                         ),
                                         Text(
-                                          '${transactionList[index]['date']}',
+                                          '${getValueServices.formatTimestamp(transactionList[index]['createdAt'].toString())}',
                                           style: TextStyle(
                                               fontSize: 12,
                                               color: Colors.blueGrey),
                                         ),
                                         Text(
                                           isCashInTransaction
-                                              ? '${transactionList[index]['sNo']}'
-                                              : '${transactionList[index]['name']}',
+                                              ? ''
+                                              : '${transactionList[index]['sn']}',
                                           style: TextStyle(
                                               fontSize: 12,
                                               color: Colors.blueGrey),

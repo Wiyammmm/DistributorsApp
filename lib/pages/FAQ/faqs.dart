@@ -15,7 +15,12 @@ class _FAQsPageState extends State<FAQsPage> {
   Widget build(BuildContext context) {
     return pageTemplate(
         thiswidget: Column(children: [
-          appBardarkblueWidget(title: "Frequently Asked Questions         "),
+          appBardarkblueWidget(
+            title: "Frequently Asked Questions         ",
+            thisFunction: () {
+              Navigator.of(context).pop();
+            },
+          ),
           titleWidget(title: "FAQs"),
           SizedBox(
             height: 20,

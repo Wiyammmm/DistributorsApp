@@ -1,4 +1,5 @@
 import 'package:art_sweetalert/art_sweetalert.dart';
+import 'package:distributorsapp/backend/get/getValueServices.dart';
 import 'package:distributorsapp/components/color.dart';
 import 'package:distributorsapp/pages/FAQ/faqs.dart';
 import 'package:distributorsapp/pages/login.dart';
@@ -21,6 +22,7 @@ class pageTemplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    GetValueServices getValueServices = GetValueServices();
     return haveappbar
         ? Scaffold(
             appBar: AppBar(
@@ -83,7 +85,7 @@ class pageTemplate extends StatelessWidget {
                             FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(
-                                "Juan Dela Cruz",
+                                " ${getValueServices.getUserName()} ",
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
@@ -95,7 +97,7 @@ class pageTemplate extends StatelessWidget {
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: Text(
-                                  "juandelacruz@gmail.com",
+                                  " ${getValueServices.getUserEmail()} ",
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,

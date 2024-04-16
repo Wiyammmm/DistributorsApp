@@ -17,7 +17,12 @@ class _SettingsPageState extends State<SettingsPage> {
     return pageTemplate(
         thiswidget: Column(
           children: [
-            appBardarkblueWidget(title: "Profile Settings"),
+            appBardarkblueWidget(
+              title: "Profile Settings",
+              thisFunction: () {
+                Navigator.of(context).pop();
+              },
+            ),
             SizedBox(
               height: 10,
             ),

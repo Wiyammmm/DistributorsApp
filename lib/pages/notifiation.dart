@@ -57,7 +57,12 @@ class _NotificationPageState extends State<NotificationPage> {
           children: [
             Column(
               children: [
-                appBardarkblueWidget(title: "Notifications"),
+                appBardarkblueWidget(
+                  title: "Notifications",
+                  thisFunction: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
                 Container(
                   height: 60,
                   decoration: BoxDecoration(

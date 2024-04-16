@@ -17,7 +17,12 @@ class _PartneredSectorsPageState extends State<PartneredSectorsPage> {
         thiswidget: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            appBardarkblueWidget(title: "Partnered Sectors"),
+            appBardarkblueWidget(
+              title: "Partnered Sectors",
+              thisFunction: () {
+                Navigator.of(context).pop();
+              },
+            ),
             titleWidget(
               title: "FILIPAY'S Allied Partners",
             ),

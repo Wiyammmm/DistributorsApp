@@ -1,7 +1,11 @@
 import 'package:distributorsapp/pages/login.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  final _myBox = await Hive.openBox('myBox');
   runApp(const MyApp());
 }
 

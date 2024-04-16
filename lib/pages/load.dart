@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:distributorsapp/backend/httprequest/httprequest.dart';
+import 'package:distributorsapp/backend/nfc/nfcServices.dart';
+import 'package:distributorsapp/backend/printer/printServices.dart';
 import 'package:distributorsapp/backend/validator.dart';
 import 'package:distributorsapp/components/buttons.dart';
 import 'package:distributorsapp/components/color.dart';
@@ -8,7 +11,9 @@ import 'package:distributorsapp/components/template.dart';
 import 'package:distributorsapp/components/widgets.dart';
 import 'package:distributorsapp/pages/home.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:nfc_manager/nfc_manager.dart';
 import 'package:sticky_headers/sticky_headers/widget.dart';
 
 class LoadPage extends StatefulWidget {
@@ -19,6 +24,10 @@ class LoadPage extends StatefulWidget {
 }
 
 class _LoadPageState extends State<LoadPage> {
+  PrintServices printService = PrintServices();
+  nfcBackend nfcbackend = nfcBackend();
+  HttprequestService httprequestService = HttprequestService();
+  final _myBox = Hive.box('myBox');
   MyModals myModals = MyModals();
   MyValidators myValidators = MyValidators();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -30,6 +39,49 @@ class _LoadPageState extends State<LoadPage> {
   TextEditingController amountController = TextEditingController();
   TextEditingController sNoController = TextEditingController();
   double amount = 0;
+  Map<String, dynamic> userInfo = {};
+
+  bool isNFCcard = false;
+
+  @override
+  void initState() {
+    userInfo = userInfo = _myBox.get('userInfo');
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    amountController.dispose();
+    sNoController.dispose();
+    NfcManager.instance.stopSession();
+    super.dispose();
+  }
+
+  Future<void> getCardId() async {
+    // Start continuous scanning
+    print('init nfc');
+    // Start Session
+    NfcManager.instance.startSession(
+      onDiscovered: (NfcTag tag) async {
+        print('${tag.data}');
+        // Do something with an NfcTag instance.
+        String tagId = nfcbackend.extractTagId(tag);
+        print("tagId: $tagId");
+        if (tagId != "" || tagId != null) {
+          Navigator.of(context).pop();
+          myModals.showProcessing(context, "PROCESSING");
+
+          // Map<String, dynamic> isUpdateBalance =
+          //     await httprequestService.updateFilipayCard({
+          //   "sn": "${sNoController.text}",
+          //   "userId": "${userInfo['_id']}",
+          //   "amount": double.parse(amountController.text)
+          // });
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return pageTemplate(
@@ -216,36 +268,41 @@ class _LoadPageState extends State<LoadPage> {
                                       },
                                     ),
                                   )
-                                : Container(
-                                    width: double.infinity,
-                                    height: 60,
-                                    decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(
-                                            width: 2,
-                                            color: myColors.darkblue)),
-                                    child: TextField(
-                                      controller: sNoController,
-                                      style:
-                                          TextStyle(color: myColors.darkblue),
-                                      decoration: InputDecoration(
-                                          hintText: "XXXXX",
-                                          hintStyle: TextStyle(
-                                            color: const Color.fromARGB(
-                                                164, 3, 168, 244),
-                                          ),
-                                          filled: false,
-                                          border: OutlineInputBorder(
-                                              borderSide: BorderSide.none)),
-                                    ),
-                                  ),
+                                : !isNFCcard
+                                    ? Container(
+                                        width: double.infinity,
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            border: Border.all(
+                                                width: 2,
+                                                color: myColors.darkblue)),
+                                        child: TextField(
+                                          controller: sNoController,
+                                          style: TextStyle(
+                                              color: myColors.darkblue),
+                                          decoration: InputDecoration(
+                                              hintText: "XXXXX",
+                                              hintStyle: TextStyle(
+                                                color: const Color.fromARGB(
+                                                    164, 3, 168, 244),
+                                              ),
+                                              filled: false,
+                                              border: OutlineInputBorder(
+                                                  borderSide: BorderSide.none)),
+                                        ),
+                                      )
+                                    : SizedBox(),
                             Row(
                               children: [
                                 Text(
                                   isFilipayAppActive
                                       ? 'Insert mobile number'
-                                      : 'Insert Account Number',
+                                      : !isNFCcard
+                                          ? 'Insert Account Number'
+                                          : 'TAP NFC CARD',
                                   style: TextStyle(
                                       fontStyle: FontStyle.italic,
                                       color:
@@ -254,6 +311,26 @@ class _LoadPageState extends State<LoadPage> {
                                 ),
                               ],
                             ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            if (!isFilipayAppActive)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Checkbox(
+                                      value: isNFCcard,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          isNFCcard = !isNFCcard;
+                                        });
+                                      }),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text('USE NFC CARD')
+                                ],
+                              ),
                             SizedBox(
                               height: 10,
                             ),
@@ -349,6 +426,9 @@ class _LoadPageState extends State<LoadPage> {
                                     color: myColors.darkblue,
                                     fontWeight: FontWeight.bold),
                                 keyboardType: TextInputType.number,
+                                onTapOutside: (value) {
+                                  FocusScope.of(context).unfocus();
+                                },
                               ),
                             ),
                             SizedBox(
@@ -378,7 +458,12 @@ class _LoadPageState extends State<LoadPage> {
                                         myValidators.validatePhoneNumber(
                                             numberController.text);
                                   } else {
-                                    isproceed = sNoController.text.trim() != "";
+                                    if (!isNFCcard) {
+                                      isproceed =
+                                          sNoController.text.trim() != "";
+                                    } else {
+                                      isproceed = true;
+                                    }
                                   }
 
                                   if (isproceed) {
@@ -388,28 +473,92 @@ class _LoadPageState extends State<LoadPage> {
                                         tempamount,
                                         isFilipayAppActive
                                             ? "0${numberController.text.replaceAll(RegExp('^0+|\\s+'), '')}"
-                                            : "${sNoController.text}", () {
+                                            : "${sNoController.text}",
+                                        () async {
+                                      if (isNFCcard) {
+                                        Navigator.of(context).pop();
+                                        getCardId();
+                                        myModals.tapCardModal(context,
+                                            "FILIPAY CARD", "filipaycard.png");
+                                        return;
+                                      }
                                       Navigator.of(context).pop();
                                       myModals.showProcessing(
                                           context, "PROCESSING");
-                                      Timer(Duration(seconds: 3), () {
-                                        Navigator.of(context).pop();
-                                        myModals.successLoadModal(
-                                            context,
-                                            isFilipayAppActive,
-                                            tempamount,
-                                            isFilipayAppActive
-                                                ? "0${numberController.text.replaceAll(RegExp('^0+|\\s+'), '')}"
-                                                : "${sNoController.text}", () {
-                                          // Navigator.of(context).pop();
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    LoadPage()),
-                                          );
+
+                                      if (!isFilipayAppActive) {
+                                        Map<String, dynamic> isUpdateBalance =
+                                            await httprequestService
+                                                .updateFilipayCard({
+                                          "sn": "${sNoController.text}",
+                                          "userId": "${userInfo['_id']}",
+                                          "amount": double.parse(
+                                              amountController.text)
                                         });
-                                      });
+                                        try {
+                                          if (isUpdateBalance['messages'][0]
+                                                      ['code']
+                                                  .toString() ==
+                                              "0") {
+                                            userInfo['balance'] =
+                                                isUpdateBalance['response']
+                                                    ['senderNewBalance'];
+                                            _myBox.put('userInfo', userInfo);
+                                            printService.printSNLoadReceipt(
+                                                "${sNoController.text}",
+                                                "${amountController.text}",
+                                                "${isUpdateBalance['response']['snPreviousBalance']}",
+                                                "${isUpdateBalance['response']['snNewBalance']}");
+                                            myModals.successLoadModal(
+                                                context,
+                                                isFilipayAppActive,
+                                                tempamount,
+                                                isFilipayAppActive
+                                                    ? "0${numberController.text.replaceAll(RegExp('^0+|\\s+'), '')}"
+                                                    : "${sNoController.text}",
+                                                () {
+                                              // Navigator.of(context).pop();
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        LoadPage()),
+                                              );
+                                            });
+                                          } else {
+                                            Navigator.of(context).pop();
+                                            myModals.errorModal(context,
+                                                "${isUpdateBalance['messages'][0]['message']}");
+                                          }
+                                        } catch (e) {
+                                          print(e);
+                                          Navigator.of(context).pop();
+                                          myModals
+                                              .somethingWentWrongModal(context);
+                                        }
+                                      } else {
+                                        Navigator.of(context).pop();
+                                        myModals.notAvailableModal(context);
+                                      }
+                                      // Timer(Duration(seconds: 3), () async {
+
+                                      //   // Navigator.of(context).pop();
+                                      //   // myModals.successLoadModal(
+                                      //   //     context,
+                                      //   //     isFilipayAppActive,
+                                      //   //     tempamount,
+                                      //   //     isFilipayAppActive
+                                      //   //         ? "0${numberController.text.replaceAll(RegExp('^0+|\\s+'), '')}"
+                                      //   //         : "${sNoController.text}", () {
+                                      //   //   // Navigator.of(context).pop();
+                                      //   //   Navigator.push(
+                                      //   //     context,
+                                      //   //     MaterialPageRoute(
+                                      //   //         builder: (context) =>
+                                      //   //             LoadPage()),
+                                      //   //   );
+                                      //   // });
+                                      // });
                                     });
                                     print(
                                         'phone number: ${numberController.text.replaceAll(RegExp('^0+|\\s+'), '')}');

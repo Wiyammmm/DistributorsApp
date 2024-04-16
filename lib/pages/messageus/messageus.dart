@@ -18,7 +18,12 @@ class _MessageUsPageState extends State<MessageUsPage> {
   Widget build(BuildContext context) {
     return pageTemplate(
         thiswidget: Column(children: [
-          appBardarkblueWidget(title: "Message Us"),
+          appBardarkblueWidget(
+            title: "Message Us",
+            thisFunction: () {
+              Navigator.of(context).pop();
+            },
+          ),
           titleWidget(title: "How may I help you?"),
           SizedBox(
             height: 20,

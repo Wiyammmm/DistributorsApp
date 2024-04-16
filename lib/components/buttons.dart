@@ -14,7 +14,7 @@ class darkblueButton extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            primary: Colors.blueAccent, // Background color
+            backgroundColor: Colors.blueAccent, // Background color
             // You can also customize other properties such as padding, shape, elevation, etc.
           ),
           onPressed: thisFunction,

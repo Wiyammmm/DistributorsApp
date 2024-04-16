@@ -232,8 +232,10 @@ class getVerifiedUploadWidget extends StatelessWidget {
 }
 
 class appBardarkblueWidget extends StatelessWidget {
-  const appBardarkblueWidget({super.key, required this.title});
+  const appBardarkblueWidget(
+      {super.key, required this.title, required this.thisFunction});
   final String title;
+  final void Function() thisFunction;
 
   @override
   Widget build(BuildContext context) {
@@ -250,13 +252,7 @@ class appBardarkblueWidget extends StatelessWidget {
             child: Row(
               children: [
                 IconButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(builder: (context) => HomePage()),
-                      // );
-                    },
+                    onPressed: thisFunction,
                     icon: Icon(
                       Icons.arrow_back_ios_new,
                       color: myColors.ligtblue,

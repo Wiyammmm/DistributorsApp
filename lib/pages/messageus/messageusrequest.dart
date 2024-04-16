@@ -38,7 +38,12 @@ class _MessageUsRequestPageState extends State<MessageUsRequestPage> {
   Widget build(BuildContext context) {
     return pageTemplate(
         thiswidget: Column(children: [
-          appBardarkblueWidget(title: "Message Us"),
+          appBardarkblueWidget(
+            title: "Message Us",
+            thisFunction: () {
+              Navigator.of(context).pop();
+            },
+          ),
           Container(
             height: 60,
             width: double.infinity,
