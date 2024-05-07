@@ -1,27 +1,99 @@
+import 'package:art_sweetalert/art_sweetalert.dart';
+import 'package:distributorsapp/backend/generator/generator.dart';
+import 'package:distributorsapp/backend/httprequest/httprequest.dart';
 import 'package:distributorsapp/components/buttons.dart';
 import 'package:distributorsapp/components/color.dart';
+import 'package:distributorsapp/components/modals.dart';
 import 'package:distributorsapp/components/template.dart';
 import 'package:distributorsapp/components/textfields.dart';
 import 'package:distributorsapp/pages/register/registerGetVerified.dart';
 import 'package:distributorsapp/pages/register/registerUserType.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 class RegisterUserProfilePage extends StatefulWidget {
-  const RegisterUserProfilePage({super.key});
+  const RegisterUserProfilePage({super.key, required this.thisData});
 
+  final thisData;
   @override
   State<RegisterUserProfilePage> createState() =>
       _RegisterUserProfilePageState();
 }
 
 class _RegisterUserProfilePageState extends State<RegisterUserProfilePage> {
+  MyModals myModals = MyModals();
+  HttprequestService httprequestService = HttprequestService();
+  GeneratorServices generatorServices = GeneratorServices();
   final TextEditingController numberController = TextEditingController();
+  TextEditingController firstNameController = TextEditingController();
+  TextEditingController lastNameController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
+  // TextEditingController mobileNumberController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passController = TextEditingController();
+  String numberInputted = "";
   String initialCountry = 'PH';
   PhoneNumber number = PhoneNumber(isoCode: 'PH');
   final _formKey = GlobalKey<FormState>();
   bool isObsecure = true;
+
+  void _registerUser() async {
+    var refnum = generatorServices.generateRandomString();
+    print('refnum: $refnum');
+    if (!widget.thisData['isDistributor']) {
+      refnum = widget.thisData['refNumber'];
+    }
+    final registerUser = await httprequestService.registerUser({
+      "firstName": "${firstNameController.text}",
+      "middleName": "",
+      "lastName": "${lastNameController.text}",
+      "password": "${passController.text}",
+      "email": "${emailController.text}",
+      "mobileNumber": "${numberInputted}",
+      "address": "${addressController.text}",
+      "referenceNumber": "$refnum",
+      "role": "${widget.thisData['isDistributor'] ? "distributor" : "retailer"}"
+    });
+
+    try {
+      if (registerUser['messages'][0]['code'].toString() == "0") {
+        print('success register');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => RegisterGetVerified()),
+        );
+      } else {
+        Navigator.of(context).pop();
+        ArtSweetAlert.show(
+            context: context,
+            artDialogArgs: ArtDialogArgs(
+                type: ArtSweetAlertType.danger,
+                title: "Oops...",
+                text: "${registerUser['messages'][0]['message']}"));
+      }
+    } catch (e) {
+      print(e);
+      if (mounted) {
+        Navigator.of(context).pop();
+        ArtSweetAlert.show(
+            context: context,
+            artDialogArgs: ArtDialogArgs(
+                type: ArtSweetAlertType.danger,
+                title: "Oops...",
+                text: "SOMETHING WENT WRONG, PLEASE TRY AGAIN"));
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    print("this data: ${widget.thisData}");
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return pageTemplate(
@@ -110,6 +182,7 @@ class _RegisterUserProfilePageState extends State<RegisterUserProfilePage> {
                         children: [
                           textformfieldWidget(
                             label: "first name",
+                            thisController: firstNameController,
                             thisTextInputType: TextInputType.name,
                           ),
                           SizedBox(
@@ -117,6 +190,7 @@ class _RegisterUserProfilePageState extends State<RegisterUserProfilePage> {
                           ),
                           textformfieldWidget(
                             label: "last name",
+                            thisController: lastNameController,
                             thisTextInputType: TextInputType.name,
                           ),
                           SizedBox(
@@ -128,7 +202,10 @@ class _RegisterUserProfilePageState extends State<RegisterUserProfilePage> {
                                 borderRadius: BorderRadius.circular(10)),
                             child: InternationalPhoneNumberInput(
                               onInputChanged: (PhoneNumber number) {
-                                print(number.phoneNumber);
+                                print("phonenumber: ${number.phoneNumber}");
+                                setState(() {
+                                  numberInputted = "${number.phoneNumber}";
+                                });
                               },
                               onInputValidated: (bool value) {
                                 print(value);
@@ -163,7 +240,16 @@ class _RegisterUserProfilePageState extends State<RegisterUserProfilePage> {
                             height: 5,
                           ),
                           textformfieldWidget(
+                            label: "Address",
+                            thisController: addressController,
+                            thisTextInputType: TextInputType.name,
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          textformfieldWidget(
                             label: "Email Address",
+                            thisController: emailController,
                             thisTextInputType: TextInputType.emailAddress,
                           ),
                           SizedBox(
@@ -177,6 +263,7 @@ class _RegisterUserProfilePageState extends State<RegisterUserProfilePage> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: TextFormField(
+                              controller: passController,
                               keyboardType: TextInputType.text,
                               obscureText: isObsecure,
                               decoration: InputDecoration(
@@ -251,13 +338,9 @@ class _RegisterUserProfilePageState extends State<RegisterUserProfilePage> {
                           ),
                           darkblueButton(
                               thisFunction: () {
+                                myModals.showProcessing(context, "Processing");
                                 if (_formKey.currentState!.validate()) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            RegisterGetVerified()),
-                                  );
+                                  _registerUser();
                                 }
                               },
                               label: "NEXT")

@@ -87,7 +87,8 @@ class _CheckBalancePageState extends State<CheckBalancePage>
           try {
             if (getBalance['messages'][0]['code'].toString() == "0") {
               printService.printBalance(
-                  "${double.parse(getBalance['response']['balance'].toString()).toStringAsFixed(2)}");
+                  "${double.parse(getBalance['response']['balance'].toString()).toStringAsFixed(2)}",
+                  "${getBalance['response']['sn']}");
               Navigator.of(context).pop();
               myModals.currentBalanceModal(context,
                   "${double.parse(getBalance['response']['balance'].toString()).toStringAsFixed(2)}");
@@ -247,7 +248,8 @@ class _CheckBalancePageState extends State<CheckBalancePage>
                                       .toString() ==
                                   "0") {
                                 printService.printBalance(
-                                    "${double.parse(getBalance['response']['balance'].toString()).toStringAsFixed(2)}");
+                                    "${double.parse(getBalance['response']['balance'].toString()).toStringAsFixed(2)}",
+                                    "${getBalance['response']['sn']}");
                                 Navigator.of(context).pop();
                                 myModals.currentBalanceModal(context,
                                     "${double.parse(getBalance['response']['balance'].toString()).toStringAsFixed(2)}");

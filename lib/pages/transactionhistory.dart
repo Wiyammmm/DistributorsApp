@@ -70,22 +70,27 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
   }
 
   Future<void> _getTransactionHistory() async {
+    DateTime currentDate = DateTime.now();
     // Set state to trigger rebuild
     userInfo = _myBox.get('userInfo');
     final responseTransactionHistory =
         await httprequestService.getTransactionHistory("${userInfo['_id']}");
-    setState(() {
-      try {
-        if (responseTransactionHistory['messages'][0]['code'].toString() ==
-            "0") {
-          transactionList = responseTransactionHistory['response'];
-          print('transactionList: $transactionList');
+    if (mounted)
+      setState(() {
+        try {
+          if (responseTransactionHistory['messages'][0]['code'].toString() ==
+              "0") {
+            transactionList = responseTransactionHistory['response'];
+            transactionList.sort((a, b) => DateTime.parse(b['createdAt'])
+                .compareTo(DateTime.parse(a['createdAt'])));
+
+            print('transactionList: $transactionList');
+          }
+        } catch (e) {
+          print('transactionList error:');
+          print(e);
         }
-      } catch (e) {
-        print('transactionList error:');
-        print(e);
-      }
-    });
+      });
   }
 
   @override
@@ -210,7 +215,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                                               padding:
                                                   const EdgeInsets.all(2.0),
                                               child: Image.asset(
-                                                "assets/gcashlogo.png",
+                                                "assets/cashin.png",
                                                 width: 50,
                                               ),
                                             ),

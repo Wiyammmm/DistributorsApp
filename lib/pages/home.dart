@@ -50,7 +50,7 @@ class _HomePageState extends State<HomePage> {
                   text: "Open Bluetooth to automatically connect"));
           print('response: $response');
           if (response.isTapConfirmButton) {
-            _connectToPrinter();
+            // _connectToPrinter();
           }
         }
       } else {
@@ -63,7 +63,7 @@ class _HomePageState extends State<HomePage> {
         print('else resultprinter: $resultprinter');
         print('response: $response');
         if (response.isTapConfirmButton) {
-          _connectToPrinter();
+          // _connectToPrinter();
         }
       }
     } catch (e) {
@@ -79,6 +79,7 @@ class _HomePageState extends State<HomePage> {
       if (gettingUserInfo['messages'][0]['code'].toString() == "0") {
         setState(() {
           userInfo = gettingUserInfo['response']['userInfo'];
+          _myBox.put('userInfo', userInfo);
         });
       } else {
         ArtSweetAlert.show(

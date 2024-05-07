@@ -1,3 +1,5 @@
+import 'package:art_sweetalert/art_sweetalert.dart';
+import 'package:distributorsapp/backend/config/config.dart';
 import 'package:distributorsapp/backend/generator/generator.dart';
 import 'package:distributorsapp/backend/get/getValueServices.dart';
 import 'package:distributorsapp/backend/httprequest/httprequest.dart';
@@ -27,6 +29,11 @@ class _CashInPageState extends State<CashInPage> {
   TextEditingController amountController = TextEditingController();
   final _myBox = Hive.box('myBox');
   Map<String, dynamic> userInfo = {};
+
+  List<Map<String, dynamic>> banksInfo = [];
+  String? selectedCoop;
+  String selectedBankId = "";
+
   late InAppWebViewController inAppWebViewController;
   String urlLink = "";
   String amountToPass = "";
@@ -34,8 +41,50 @@ class _CashInPageState extends State<CashInPage> {
   @override
   void initState() {
     userInfo = _myBox.get('userInfo');
-    print('userInfo: $userInfo');
+
+    getBanks();
+    print('uerInfo: $userInfo');
     super.initState();
+  }
+
+  void getBanks() async {
+    final getBanks = await httprequestService.getBanks();
+
+    try {
+      if (getBanks['messages'][0]['code'].toString() == "0") {
+        print('dito');
+        setState(() {
+          banksInfo = (getBanks['response'] as List<dynamic>)
+              .cast<Map<String, dynamic>>();
+          banksInfo = banksInfo
+              .where((coop) => coop['isLive'] == Config.isLive)
+              .toList();
+        });
+        print('banksInfo: $banksInfo');
+      } else {
+        ArtSweetAlert.show(
+                context: context,
+                artDialogArgs: ArtDialogArgs(
+                    type: ArtSweetAlertType.danger,
+                    title: "Oops...",
+                    text: "SOMETHING WENT WRONG, PLEASE TRY AGAIN"))
+            .then((value) {
+          Navigator.of(context).pop();
+        });
+      }
+    } catch (e) {
+      print(e);
+      if (mounted)
+        ArtSweetAlert.show(
+                context: context,
+                artDialogArgs: ArtDialogArgs(
+                    type: ArtSweetAlertType.danger,
+                    title: "Oops...",
+                    text: "SOMETHING WENT WRONG, PLEASE TRY AGAIN"))
+            .then((value) {
+          Navigator.of(context).pop();
+        });
+    }
   }
 
   @override
@@ -137,10 +186,53 @@ class _CashInPageState extends State<CashInPage> {
                                     fontWeight: FontWeight.bold,
                                     fontSize: 20),
                               ),
-                              Image.asset(
-                                "assets/filipaylogobanner.png",
-                                width: 50,
-                              )
+
+                              Container(
+                                width: MediaQuery.of(context).size.width * 0.25,
+                                decoration: BoxDecoration(
+                                  border: Border.all(width: 1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: DropdownButton<String>(
+                                      underline: Container(),
+                                      hint: Text('Select Coop'), // Placeholder
+                                      value: selectedCoop,
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          selectedCoop = newValue;
+                                          selectedBankId = banksInfo.firstWhere(
+                                              (coop) =>
+                                                  coop['cooperativeCodeName'] ==
+                                                  newValue)['bankId'];
+                                        });
+                                        print(
+                                            "selectedBankId: $selectedBankId");
+                                      },
+                                      items: banksInfo
+                                          .map<DropdownMenuItem<String>>(
+                                              (Map<String, dynamic> coop) {
+                                        return DropdownMenuItem<String>(
+                                          value: coop['cooperativeCodeName']
+                                              .toString(),
+                                          child: Text(
+                                            coop['cooperativeCodeName']
+                                                .toString(),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              // Image.asset(
+                              //   "assets/filipaylogobanner.png",
+                              //   width: 50,
+                              // )
                             ],
                           ),
                           Divider(
@@ -295,11 +387,11 @@ class _CashInPageState extends State<CashInPage> {
                                     "memo":
                                         "distributor-${userInfo['_id']}-${getValueServices.convertToCents(amountController.text)}",
                                     "destination_account_id":
-                                        "1957a366-d46b-11ee-8de3-42010a88002a",
+                                        "${selectedBankId}",
                                     "client": {
-                                      "display_name": "Your Application Name",
+                                      "display_name": "${selectedCoop}",
                                       "logo_url":
-                                          "https://example.com/logo.svg",
+                                          "https://filipworks.com/busticketing/assets/Filipay-logo-893d1a80.png",
                                       "return_url":
                                           "https://filipworks.com/success.html",
                                       "fail_url":
@@ -344,6 +436,10 @@ class _CashInPageState extends State<CashInPage> {
 
   bool _validateAmount() {
     try {
+      if (selectedBankId == "") {
+        myModals.missingFieldModal(context, "Coop first");
+        return false;
+      }
       double amount = double.parse(amountController.text);
       if (amount < 10) {
         myModals.invalidModal(context, "AMOUNT");

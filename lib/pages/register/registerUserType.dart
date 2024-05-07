@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:art_sweetalert/art_sweetalert.dart';
+import 'package:distributorsapp/backend/httprequest/httprequest.dart';
 import 'package:distributorsapp/components/buttons.dart';
 import 'package:distributorsapp/components/color.dart';
 import 'package:distributorsapp/components/modals.dart';
 import 'package:distributorsapp/components/template.dart';
+import 'package:distributorsapp/pages/login.dart';
 import 'package:distributorsapp/pages/register/registerUserProfile.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +20,7 @@ class RegisterUserTypePage extends StatefulWidget {
 class _RegisterUserTypePageState extends State<RegisterUserTypePage> {
   bool isDistributor = true;
   MyModals myModals = MyModals();
+  HttprequestService httprequestService = HttprequestService();
   TextEditingController referenceNumberController = TextEditingController();
   @override
   Widget build(BuildContext context) {
@@ -30,10 +34,39 @@ class _RegisterUserTypePageState extends State<RegisterUserTypePage> {
                 SizedBox(
                   height: 10,
                 ),
-                Image.asset(
-                  "assets/FILIPAYDistributorLogo2.png",
-                  width: MediaQuery.of(context).size.width * 0.5,
+                Container(
+                  width: double.infinity,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginPage()),
+                            );
+                          },
+                          icon: Icon(Icons.arrow_back_ios_new_rounded,
+                              color: myColors.darkblue)),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Image.asset(
+                          "assets/FILIPAYDistributorLogo2.png",
+                          width: 120,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 20,
+                      )
+                    ],
+                  ),
                 ),
+                // Image.asset(
+                //   "assets/FILIPAYDistributorLogo2.png",
+                //   width: MediaQuery.of(context).size.width * 0.5,
+                // ),
                 SizedBox(height: 20),
                 Row(
                   children: [
@@ -216,7 +249,7 @@ class _RegisterUserTypePageState extends State<RegisterUserTypePage> {
                   height: 20,
                 ),
                 darkblueButton(
-                    thisFunction: () {
+                    thisFunction: () async {
                       if (!isDistributor) {
                         if (referenceNumberController.text.trim() == "") {
                           myModals.missingFieldModal(
@@ -224,20 +257,54 @@ class _RegisterUserTypePageState extends State<RegisterUserTypePage> {
                           return;
                         }
                         myModals.showProcessing(context, "CHECKING");
-                        Timer(Duration(seconds: 3), () {
+                        final checkRefNum = await httprequestService
+                            .checkRefNum(referenceNumberController.text.trim());
+
+                        if (checkRefNum['messages'][0]['code'].toString() ==
+                            "0") {
                           Navigator.of(context).pop();
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    RegisterUserProfilePage()),
+                                builder: (context) => RegisterUserProfilePage(
+                                      thisData: {
+                                        "isDistributor": false,
+                                        "refNumber":
+                                            "${referenceNumberController.text.trim()}"
+                                      },
+                                    )),
                           );
-                        });
+                        } else {
+                          Navigator.of(context).pop();
+                          ArtSweetAlert.show(
+                              context: context,
+                              artDialogArgs: ArtDialogArgs(
+                                  type: ArtSweetAlertType.danger,
+                                  title: "Oops...",
+                                  text:
+                                      "This Reference Number is not existing."));
+                        }
+                        // Timer(Duration(seconds: 3), () {
+                        //   Navigator.of(context).pop();
+                        //   Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //         builder: (context) => RegisterUserProfilePage(
+                        //               thisData: {
+                        //                 "isDistributor": false,
+                        //                 "refNumber":
+                        //                     "${referenceNumberController.text.trim()}"
+                        //               },
+                        //             )),
+                        //   );
+                        // });
                       } else {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => RegisterUserProfilePage()),
+                              builder: (context) => RegisterUserProfilePage(
+                                    thisData: {"isDistributor": true},
+                                  )),
                         );
                       }
                     },

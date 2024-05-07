@@ -47,14 +47,12 @@ class PrintServices {
     });
   }
 
-  printBalance(
-    String amount,
-  ) {
+  printBalance(String amount, String sNo) {
     bluetooth.isConnected.then((isConnected) {
       if (isConnected == true) {
         bluetooth.printCustom("LOAD RECEIPT", 1, 1);
         bluetooth.printCustom("POWERED BY: FILIPAY", 1, 1);
-
+        bluetooth.printLeftRight("SNO", "$sNo", 1);
         bluetooth.printLeftRight("AMOUNT", "$amount", 1);
 
         bluetooth.printCustom("- - - - - - - - - - - - - - -", 1, 1);

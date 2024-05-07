@@ -2,13 +2,14 @@ import 'package:distributorsapp/components/color.dart';
 import 'package:flutter/material.dart';
 
 class textformfieldWidget extends StatelessWidget {
-  const textformfieldWidget({
-    super.key,
-    required this.label,
-    required this.thisTextInputType,
-  });
+  const textformfieldWidget(
+      {super.key,
+      required this.label,
+      required this.thisTextInputType,
+      required this.thisController});
   final String label;
   final TextInputType thisTextInputType;
+  final TextEditingController thisController;
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +21,7 @@ class textformfieldWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: TextFormField(
+        controller: thisController,
         keyboardType: thisTextInputType,
         decoration: InputDecoration(
           border: OutlineInputBorder(borderSide: BorderSide.none),
@@ -32,6 +34,14 @@ class textformfieldWidget extends StatelessWidget {
         validator: (value) {
           if (value == null || value.isEmpty) {
             return 'Please enter your ${label.toLowerCase()}';
+          }
+          if (label == "Email Address") {
+            RegExp emailRegExp =
+                RegExp(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$");
+            if (!emailRegExp.hasMatch(value)) {
+              return 'Please enter a valid email address';
+            }
+            return null;
           }
           return null;
         },
@@ -60,6 +70,7 @@ class textfieldWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: TextFormField(
+        controller: thisController,
         keyboardType: thisTextInputType,
         decoration: InputDecoration(
           border: OutlineInputBorder(borderSide: BorderSide.none),

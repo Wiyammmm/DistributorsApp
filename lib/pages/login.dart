@@ -176,6 +176,19 @@ class _LoginPageState extends State<LoginPage> {
                                                     "Your Account is not Verified yet"));
                                       }
                                     } else {
+                                      if (isLogin['messages'][0]['code']
+                                              .toString() ==
+                                          "500") {
+                                        Navigator.of(context).pop();
+                                        ArtSweetAlert.show(
+                                            context: context,
+                                            artDialogArgs: ArtDialogArgs(
+                                                type: ArtSweetAlertType.danger,
+                                                title: "Oops...",
+                                                text:
+                                                    "NO INTERNET CONNECTION"));
+                                        return;
+                                      }
                                       Navigator.of(context).pop();
                                       ArtSweetAlert.show(
                                           context: context,
