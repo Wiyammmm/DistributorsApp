@@ -76,7 +76,7 @@ class HttprequestService {
           )
           .timeout(Duration(seconds: 30));
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         // Successful response
         responseRequest = json.decode(response.body);
         print('isLogin response: $responseRequest');

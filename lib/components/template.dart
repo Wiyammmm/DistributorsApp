@@ -1,6 +1,7 @@
 import 'package:art_sweetalert/art_sweetalert.dart';
 import 'package:distributorsapp/backend/get/getValueServices.dart';
 import 'package:distributorsapp/components/color.dart';
+import 'package:distributorsapp/components/loadReceiptImage.dart';
 import 'package:distributorsapp/pages/FAQ/faqs.dart';
 import 'package:distributorsapp/pages/login.dart';
 import 'package:distributorsapp/pages/messageus/messageus.dart';
@@ -49,9 +50,24 @@ class pageTemplate extends StatelessWidget {
                   },
                 ),
               ],
-              title: Image.asset(
-                "assets/FILIPAYDistributorLogo2.png",
-                width: 100,
+              title: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => LoadReceiptImage(
+                            amount: 10,
+                            thisName: "SNR2021-02463",
+                            prevAmount: "0",
+                            newAmount: "10",
+                            refNum: "123123123",
+                            date: "05-13-2024")),
+                  );
+                },
+                child: Image.asset(
+                  "assets/FILIPAYDistributorLogo2.png",
+                  width: 100,
+                ),
               ),
               centerTitle: true,
             ),

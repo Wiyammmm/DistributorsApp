@@ -21,12 +21,8 @@ class PrintServices {
     });
   }
 
-  printSNLoadReceipt(
-    String sNo,
-    String amount,
-    String receiverPrevBalance,
-    String receiverNewBalance,
-  ) {
+  printSNLoadReceipt(String sNo, String amount, String receiverPrevBalance,
+      String receiverNewBalance, String referenceNumber) {
     bluetooth.isConnected.then((isConnected) {
       if (isConnected == true) {
         bluetooth.printCustom("LOAD RECEIPT", 1, 1);
@@ -38,6 +34,7 @@ class PrintServices {
             "${double.parse(receiverPrevBalance).toStringAsFixed(2)}", 1);
         bluetooth.printLeftRight("NEW BALANCE",
             "${double.parse(receiverNewBalance).toStringAsFixed(2)}", 1);
+        bluetooth.printLeftRight("reference#", "$referenceNumber", 1);
         bluetooth.printCustom("- - - - - - - - - - - - - - -", 1, 1);
         bluetooth.printCustom("NOT AN OFFICIAL RECEIPT", 1, 1);
         bluetooth.printNewLine();

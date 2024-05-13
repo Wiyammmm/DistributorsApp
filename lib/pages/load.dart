@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:distributorsapp/backend/get/getValueServices.dart';
 import 'package:distributorsapp/backend/httprequest/httprequest.dart';
 import 'package:distributorsapp/backend/nfc/nfcServices.dart';
 import 'package:distributorsapp/backend/printer/printServices.dart';
@@ -24,6 +25,7 @@ class LoadPage extends StatefulWidget {
 }
 
 class _LoadPageState extends State<LoadPage> {
+  GetValueServices getValueServices = GetValueServices();
   PrintServices printService = PrintServices();
   nfcBackend nfcbackend = nfcBackend();
   HttprequestService httprequestService = HttprequestService();
@@ -68,15 +70,66 @@ class _LoadPageState extends State<LoadPage> {
         String tagId = nfcbackend.extractTagId(tag);
         print("tagId: $tagId");
         if (tagId != "" || tagId != null) {
+          double tempamount = 0;
+          try {
+            tempamount = double.parse(amountController.text);
+          } catch (e) {
+            print(e);
+            myModals.invalidModal(context, "amount");
+            return;
+          }
           Navigator.of(context).pop();
           myModals.showProcessing(context, "PROCESSING");
 
-          // Map<String, dynamic> isUpdateBalance =
-          //     await httprequestService.updateFilipayCard({
-          //   "sn": "${sNoController.text}",
-          //   "userId": "${userInfo['_id']}",
-          //   "amount": double.parse(amountController.text)
-          // });
+          Map<String, dynamic> isUpdateBalance =
+              await httprequestService.updateFilipayCard({
+            // "sn": "",
+            "cardId": "$tagId",
+            "userId": "${userInfo['_id']}",
+            "amount": double.parse(amountController.text)
+          });
+          Navigator.of(context).pop();
+          try {
+            if (isUpdateBalance['messages'][0]['code'].toString() == "0") {
+              userInfo['balance'] =
+                  isUpdateBalance['response']['senderNewBalance'];
+              _myBox.put('userInfo', userInfo);
+              printService.printSNLoadReceipt(
+                  "${sNoController.text}",
+                  "${amountController.text}",
+                  "${isUpdateBalance['response']['snPreviousBalance']}",
+                  "${isUpdateBalance['response']['snNewBalance']}",
+                  "${isUpdateBalance['response']['referenceNumber']}");
+              myModals.successLoadModal(
+                  context,
+                  isFilipayAppActive,
+                  tempamount,
+                  "${isUpdateBalance['response']['snPreviousBalance']}",
+                  "${isUpdateBalance['response']['snNewBalance']}",
+                  isFilipayAppActive
+                      ? "0${numberController.text.replaceAll(RegExp('^0+|\\s+'), '')}"
+                      : "${sNoController.text}",
+                  "${isUpdateBalance['response']['referenceNumber']}",
+                  "${isUpdateBalance['response']['sn']}",
+                  "${getValueServices.convertToPhilippineTime("${isUpdateBalance['response']['createdAt']}")}",
+                  () {
+                // Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoadPage()),
+                );
+              });
+            } else {
+              Navigator.of(context).pop();
+              myModals.errorModal(
+                  context, "${isUpdateBalance['messages'][0]['message']}");
+            }
+          } catch (e) {
+            print(e);
+            Navigator.of(context).pop();
+            myModals.somethingWentWrongModal(context);
+          }
+          NfcManager.instance.stopSession();
         }
       },
     );
@@ -323,6 +376,11 @@ class _LoadPageState extends State<LoadPage> {
                                       onChanged: (value) {
                                         setState(() {
                                           isNFCcard = !isNFCcard;
+                                          // if (isNFCcard) {
+                                          //   getCardId();
+                                          // } else {
+                                          //   NfcManager.instance.stopSession();
+                                          // }
                                         });
                                       }),
                                   SizedBox(
@@ -508,14 +566,20 @@ class _LoadPageState extends State<LoadPage> {
                                                 "${sNoController.text}",
                                                 "${amountController.text}",
                                                 "${isUpdateBalance['response']['snPreviousBalance']}",
-                                                "${isUpdateBalance['response']['snNewBalance']}");
+                                                "${isUpdateBalance['response']['snNewBalance']}",
+                                                "${isUpdateBalance['response']['referenceNumber']}");
                                             myModals.successLoadModal(
                                                 context,
                                                 isFilipayAppActive,
                                                 tempamount,
+                                                "${isUpdateBalance['response']['snPreviousBalance']}",
+                                                "${isUpdateBalance['response']['snNewBalance']}",
                                                 isFilipayAppActive
                                                     ? "0${numberController.text.replaceAll(RegExp('^0+|\\s+'), '')}"
                                                     : "${sNoController.text}",
+                                                "${isUpdateBalance['response']['referenceNumber']}",
+                                                "${isUpdateBalance['response']['sn']}",
+                                                "${getValueServices.convertToPhilippineTime("${isUpdateBalance['response']['createdAt']}")}",
                                                 () {
                                               // Navigator.of(context).pop();
                                               Navigator.push(

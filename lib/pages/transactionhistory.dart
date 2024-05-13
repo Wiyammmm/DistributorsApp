@@ -6,6 +6,7 @@ import 'package:distributorsapp/components/widgets.dart';
 import 'package:distributorsapp/pages/home.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 
 class TransactionHistoryPage extends StatefulWidget {
   const TransactionHistoryPage({super.key});
@@ -67,6 +68,20 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
     // TODO: implement initState
 
     super.initState();
+  }
+
+  String convertToPhilippineTime(String utcTimestamp) {
+    // Parse the provided timestamp
+    DateTime utcTime = DateTime.parse(utcTimestamp);
+
+    // Add 8 hours to convert from UTC to Philippine time
+    DateTime philippineTime = utcTime.add(Duration(hours: 8));
+
+    // Format the Philippine time to the desired format
+    String formattedPhilippineTime =
+        DateFormat('yyyy-MM-dd HH:mm:ss').format(philippineTime);
+
+    return formattedPhilippineTime;
   }
 
   Future<void> _getTransactionHistory() async {
@@ -253,10 +268,11 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                                               fontWeight: FontWeight.bold),
                                         ),
                                         Text(
-                                          '${getValueServices.formatTimestamp(transactionList[index]['createdAt'].toString())}',
+                                          '${getValueServices.convertToPhilippineTime(transactionList[index]['createdAt'].toString())}',
                                           style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.blueGrey),
+                                            fontSize: 12,
+                                            color: Colors.blueGrey,
+                                          ),
                                         ),
                                         Text(
                                           isCashInTransaction

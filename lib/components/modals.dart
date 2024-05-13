@@ -1,11 +1,20 @@
+import 'dart:typed_data';
+
 import 'package:art_sweetalert/art_sweetalert.dart';
 import 'package:distributorsapp/components/buttons.dart';
 import 'package:distributorsapp/components/color.dart';
+
 import 'package:distributorsapp/pages/login.dart';
 import 'package:distributorsapp/pages/transactionhistory.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
+import 'package:gallery_saver/gallery_saver.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:screenshot/screenshot.dart';
 
 class MyModals {
+  final GlobalKey<ScreenshotState> _screenshotKey =
+      GlobalKey<ScreenshotState>();
   void currentBalanceModal(BuildContext context, String amount) {
     showDialog(
       context: context,
@@ -251,7 +260,7 @@ class MyModals {
   void showProcessing(BuildContext context, String label) {
     showDialog(
         context: context,
-        // barrierDismissible: false,
+        barrierDismissible: false,
         builder: (BuildContext context) {
           return PopScope(
             canPop: true,
@@ -295,7 +304,11 @@ class MyModals {
         });
   }
 
-  void tapCardModal(BuildContext context, String cardName, String imageName) {
+  void tapCardModal(
+    BuildContext context,
+    String cardName,
+    String imageName,
+  ) {
     showDialog(
         context: context,
         // barrierDismissible: false,
@@ -334,138 +347,372 @@ class MyModals {
         });
   }
 
-  void successLoadModal(BuildContext context, bool isFilipayAppActive,
-      double amount, String phoneNumber, void Function() thisFunction) {
+  void successLoadModal(
+      BuildContext context,
+      bool isFilipayAppActive,
+      double amount,
+      String previousAmount,
+      String newAmount,
+      String phoneNumber,
+      String referenceNumber,
+      String thisName,
+      String date,
+      void Function() thisFunction) {
+    final ScreenshotController _screenshotController = ScreenshotController();
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           contentPadding: EdgeInsets.zero,
-          content: Container(
-            height: MediaQuery.of(context).size.height * 0.6,
-            decoration: BoxDecoration(
-                color: Colors.white, borderRadius: BorderRadius.circular(10)),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Stack(
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          'Congratulations!',
-                          style: TextStyle(
-                              color: myColors.darkblue,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20),
-                        ),
-                      ),
-                      isFilipayAppActive
-                          ? Image.asset(
-                              "assets/filipaylogobanner.png",
-                              width: 50,
-                            )
-                          : Image.asset(
-                              "assets/filipaycard.png",
-                              width: 50,
+          content:
+              // Screenshot(
+              // key: _screenshotKey,
+              // controller: _screenshotController,
+              // child:
+              Stack(
+            children: [
+              Screenshot(
+                controller: _screenshotController,
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  decoration: BoxDecoration(color: myColors.ligtblue),
+                  child: Center(
+                    // key: containerKey,
+                    child: Stack(
+                      children: [
+                        Align(
+                          alignment: Alignment.topCenter,
+                          child: Padding(
+                            padding: const EdgeInsets.all(40.0),
+                            child: Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: Container(
+                                    height: 200,
+                                    // margin: EdgeInsets.only(top: 200),
+                                    decoration: BoxDecoration(
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.3),
+                                          spreadRadius: 10,
+                                          blurRadius: 7,
+                                          offset: Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                ClipPath(
+                                  clipper: PointsClipper(),
+                                  child: Container(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.6,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(10),
+                                        topRight: Radius.circular(10),
+                                      ),
+                                      // boxShadow: [
+                                      //   BoxShadow(
+                                      //     color: Colors.grey.withOpacity(0.5),
+                                      //     spreadRadius: 10,
+                                      //     blurRadius: 7,
+                                      //     offset: Offset(0, 3),
+                                      //   ),
+                                      // ],
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16.0, vertical: 40),
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            '${thisName}',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                          Divider(),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                'Previous Amount',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  // fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              Text(
+                                                '${double.parse(previousAmount).toStringAsFixed(2)}',
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                  // fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                'New Amount',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  // fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              Text(
+                                                '${double.parse(newAmount).toStringAsFixed(2)}',
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                  // fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Divider(),
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                          RichText(
+                                            text: TextSpan(
+                                                text: 'Amount:',
+                                                style: TextStyle(
+                                                    fontSize: 20,
+                                                    color: Colors.black),
+                                                children: [
+                                                  TextSpan(
+                                                      text:
+                                                          ' ${amount.toStringAsFixed(2)}',
+                                                      style: TextStyle(
+                                                          fontSize: 25,
+                                                          fontWeight:
+                                                              FontWeight.bold))
+                                                ]),
+                                          ),
+                                          Divider(),
+                                          Text('$date'),
+                                          // Text(
+                                          //   'Amount Sent: $amount',
+                                          //   style: TextStyle(
+                                          //     fontSize: 25,
+                                          //     // fontWeight: FontWeight.bold,
+                                          //   ),
+                                          // ),
+                                          SizedBox(
+                                            height: 50,
+                                          ),
+                                          Image.asset(
+                                            "assets/receiptPoweredBy.png",
+                                            width: 130,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.topCenter,
+                          child: Container(
+                            child: isFilipayAppActive
+                                ? Image.asset(
+                                    "assets/filipaylogobanner.png",
+                                    width: 100,
+                                  )
+                                : Image.asset(
+                                    "assets/filipaycard.png",
+                                    width: 100,
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                height: MediaQuery.of(context).size.height * 0.7,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10)),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Stack(
+                    children: [
                       Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('$phoneNumber'),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'Congratulations!',
+                              style: TextStyle(
+                                  color: myColors.darkblue,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20),
+                            ),
+                          ),
+                          isFilipayAppActive
+                              ? Image.asset(
+                                  "assets/filipaylogobanner.png",
+                                  width: 100,
+                                )
+                              : Image.asset(
+                                  "assets/filipaycard.png",
+                                  width: 100,
+                                ),
+                          Column(
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
+                              Text('$phoneNumber'),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: Text(
+                                      'PHP ',
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                  ),
+                                  Text(
+                                    '${amount.toDouble().toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                        fontSize: 40,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                              Text('$thisName'),
+                              Text('$date'),
+                              Opacity(
+                                opacity: 0.5,
                                 child: Text(
-                                  'PHP ',
+                                  'The amount show above has been successfully loaded to $phoneNumber',
+                                  textAlign: TextAlign.center,
                                   style: TextStyle(fontSize: 12),
                                 ),
-                              ),
-                              Text(
-                                '${amount.toDouble().toStringAsFixed(2)}',
-                                style: TextStyle(
-                                    fontSize: 40, fontWeight: FontWeight.bold),
-                              ),
+                              )
                             ],
                           ),
-                          Opacity(
-                            opacity: 0.5,
-                            child: Text(
-                              'The amount show above has been successfully loaded to $phoneNumber',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          )
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              width: double.infinity,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border.all(
-                                      width: 1, color: Colors.grey.shade100)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              TransactionHistoryPage()),
-                                    );
-                                  },
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Transaction History',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15),
+                          Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () {},
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      border: Border.all(
+                                          width: 1,
+                                          color: Colors.grey.shade100)),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  TransactionHistoryPage()),
+                                        );
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'Transaction History',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15),
+                                          ),
+                                          IconButton(
+                                              onPressed: () {
+                                                Navigator.pushReplacement(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          TransactionHistoryPage()),
+                                                );
+                                              },
+                                              icon: Icon(
+                                                  Icons.chevron_right_sharp,
+                                                  color: Colors.black))
+                                        ],
                                       ),
-                                      IconButton(
-                                          onPressed: () {},
-                                          icon: Icon(Icons.chevron_right_sharp,
-                                              color: Colors.black))
-                                    ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                          SizedBox(height: 5),
-                          darkblueButton(
-                              thisFunction: thisFunction,
-                              label: "Back to Main Menu"),
+                              SizedBox(height: 5),
+                              darkblueButton(
+                                  thisFunction: thisFunction,
+                                  label: "Back to Main Menu"),
+                            ],
+                          )
                         ],
-                      )
+                      ),
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: IconButton(
+                            onPressed: () async {
+                              Uint8List? imageBytes =
+                                  await _screenshotController.capture();
+
+                              // Save the image to the gallery
+                              if (imageBytes != null) {
+                                // await ImageGallerySaver.saveImage(imageBytes);
+                                final result =
+                                    await ImageGallerySaver.saveImage(
+                                        imageBytes.buffer.asUint8List());
+                                print("imageFile result: $result");
+                                if (result['isSuccess']) {
+                                  successModal(context, "Saved Image", (value) {
+                                    // Navigator.of(context).pop();
+                                  });
+                                } else {
+                                  errorModal(context,
+                                      "Something went wrong, please try again");
+                                }
+                                // Show a snackbar indicating that the image has been saved
+                                // ScaffoldMessenger.of(context).showSnackBar(
+                                //   SnackBar(
+                                //       content: Text('Image saved to gallery')),
+                                // );
+                              }
+                              print('imageFile: $imageBytes');
+                            },
+                            icon: Icon(
+                              Icons.download,
+                              color: Colors.lightBlue,
+                            )),
+                      ),
                     ],
                   ),
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                        onPressed: () {},
-                        icon: Icon(
-                          Icons.download,
-                          color: Colors.lightBlue,
-                        )),
-                  ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
+          // ),
         );
       },
     );

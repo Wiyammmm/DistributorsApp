@@ -52,4 +52,18 @@ class GetValueServices {
     DateTime dateTime = DateTime.parse(timestamp);
     return DateFormat.yMMMMd().add_jms().format(dateTime);
   }
+
+  String convertToPhilippineTime(String utcTimestamp) {
+    // Parse the provided timestamp
+    DateTime utcTime = DateTime.parse(utcTimestamp);
+
+    // Add 8 hours to convert from UTC to Philippine time
+    DateTime philippineTime = utcTime.add(Duration(hours: 11, minutes: 15));
+    print('philippineTime: $philippineTime');
+    // Format the Philippine time to the desired format
+    String formattedPhilippineTime =
+        DateFormat('MMMM dd, yyyy hh:mm:ss a').format(philippineTime);
+
+    return formattedPhilippineTime;
+  }
 }

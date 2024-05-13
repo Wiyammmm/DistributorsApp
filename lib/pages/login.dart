@@ -135,6 +135,7 @@ class _LoginPageState extends State<LoginPage> {
                                     "email": "${emailController.text}",
                                     "password": "${passwordController.text}"
                                   });
+                                  print('isLogin: $isLogin');
                                   try {
                                     if (isLogin['messages'][0]['code']
                                             .toString() ==
