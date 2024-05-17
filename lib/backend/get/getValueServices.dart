@@ -58,7 +58,7 @@ class GetValueServices {
     DateTime utcTime = DateTime.parse(utcTimestamp);
 
     // Add 8 hours to convert from UTC to Philippine time
-    DateTime philippineTime = utcTime.add(Duration(hours: 11, minutes: 15));
+    DateTime philippineTime = utcTime.add(Duration(hours: 8, minutes: 0));
     print('philippineTime: $philippineTime');
     // Format the Philippine time to the desired format
     String formattedPhilippineTime =

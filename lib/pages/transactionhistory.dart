@@ -1,12 +1,19 @@
+import 'dart:typed_data';
+
 import 'package:distributorsapp/backend/get/getValueServices.dart';
 import 'package:distributorsapp/backend/httprequest/httprequest.dart';
 import 'package:distributorsapp/components/color.dart';
+import 'package:distributorsapp/components/loadReceiptImage.dart';
+import 'package:distributorsapp/components/modals.dart';
+import 'package:distributorsapp/components/receiptImage.dart';
 import 'package:distributorsapp/components/template.dart';
 import 'package:distributorsapp/components/widgets.dart';
 import 'package:distributorsapp/pages/home.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:intl/intl.dart';
+import 'package:screenshot/screenshot.dart';
 
 class TransactionHistoryPage extends StatefulWidget {
   const TransactionHistoryPage({super.key});
@@ -18,7 +25,11 @@ class TransactionHistoryPage extends StatefulWidget {
 class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
   HttprequestService httprequestService = HttprequestService();
   GetValueServices getValueServices = GetValueServices();
+
+  final ScreenshotController _screenshotController = ScreenshotController();
+  final GlobalKey _globalKey = GlobalKey();
   final _myBox = Hive.box('myBox');
+  MyModals myModals = MyModals();
   bool isCashInTransaction = true;
   Map<String, dynamic> userInfo = {};
   var transactionList = [
@@ -114,74 +125,80 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
         thiswidget: Column(children: [
           appBardarkblueWidget(
               title: "Transaction History",
-              thisFunction: () {
+              thisFunction: () async {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => HomePage()),
                 );
               }),
-          Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 2,
-                  blurRadius: 2,
-                  offset: Offset(0, 3), // changes position of shadow
+          Stack(
+            children: [
+              // SizedBox(height: 500, child: LoadReceiptImage()),
+              Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 2,
+                      offset: Offset(0, 3), // changes position of shadow
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                    child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isCashInTransaction = true;
-                    });
-                  },
-                  child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                        color:
-                            isCashInTransaction ? Colors.white : Colors.grey),
-                    child: Center(
-                        child: Text(
-                      'Cash In Transaction',
-                      style: TextStyle(
-                          color: isCashInTransaction
-                              ? Colors.lightBlue
-                              : Colors.blueGrey,
-                          fontWeight: FontWeight.bold),
+                child: Row(
+                  children: [
+                    Expanded(
+                        child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isCashInTransaction = true;
+                        });
+                      },
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                            color: isCashInTransaction
+                                ? Colors.white
+                                : Colors.grey),
+                        child: Center(
+                            child: Text(
+                          'Cash In Transaction',
+                          style: TextStyle(
+                              color: isCashInTransaction
+                                  ? Colors.lightBlue
+                                  : Colors.blueGrey,
+                              fontWeight: FontWeight.bold),
+                        )),
+                      ),
                     )),
-                  ),
-                )),
-                Expanded(
-                    child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isCashInTransaction = false;
-                    });
-                  },
-                  child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                        color: !isCashInTransaction
-                            ? Colors.white
-                            : Color(0xffe0e0e0)),
-                    child: Center(
-                        child: Text(
-                      'Load Transaction',
-                      style: TextStyle(
-                          color: !isCashInTransaction
-                              ? Colors.lightBlue
-                              : Colors.blueGrey,
-                          fontWeight: FontWeight.bold),
+                    Expanded(
+                        child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isCashInTransaction = false;
+                        });
+                      },
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                            color: !isCashInTransaction
+                                ? Colors.white
+                                : Color(0xffe0e0e0)),
+                        child: Center(
+                            child: Text(
+                          'Load Transaction',
+                          style: TextStyle(
+                              color: !isCashInTransaction
+                                  ? Colors.lightBlue
+                                  : Colors.blueGrey,
+                              fontWeight: FontWeight.bold),
+                        )),
+                      ),
                     )),
-                  ),
-                )),
-              ],
-            ),
+                  ],
+                ),
+              ),
+            ],
           ),
           Expanded(
             child: ListView.builder(
@@ -287,7 +304,53 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                                   ],
                                 ),
                                 IconButton(
-                                    onPressed: () {},
+                                    onPressed: () async {
+                                      myModals.showProcessing(
+                                          context, "Downloading");
+                                      print(
+                                          'transactionList[index]: ${transactionList[index]}');
+                                      _screenshotController
+                                          .captureFromWidget(ReceiptImage(
+                                        thisName:
+                                            "${transactionList[index]['sn']}",
+                                        prevAmount:
+                                            "${transactionList[index]['snPreviousBalance']}",
+                                        newAmount:
+                                            "${transactionList[index]['snNewBalance']}",
+                                        refNum:
+                                            "${transactionList[index]['referenceNumber']}",
+                                        date: getValueServices
+                                            .convertToPhilippineTime(
+                                                "${transactionList[index]['createdAt']}"),
+                                        amount: double.parse(
+                                                transactionList[index]
+                                                        ['snNewBalance']
+                                                    .toString()) -
+                                            double.parse(transactionList[index]
+                                                    ['snPreviousBalance']
+                                                .toString()),
+                                      ))
+                                          .then((capturedImage) async {
+                                        print('capturedImage: $capturedImage');
+                                        final result =
+                                            await ImageGallerySaver.saveImage(
+                                                capturedImage.buffer
+                                                    .asUint8List());
+                                        if (result['isSuccess']) {
+                                          Navigator.of(context).pop();
+                                          myModals.successModal(
+                                              context, "Saved Image", (value) {
+                                            // Navigator.of(context).pop();
+                                          });
+                                        } else {
+                                          Navigator.of(context).pop();
+                                          myModals.errorModal(context,
+                                              "Something went wrong, please try again");
+                                        }
+
+                                        print("imageFile result: $result");
+                                      });
+                                    },
                                     icon: Icon(
                                       Icons.download,
                                       color: Colors.lightBlue,

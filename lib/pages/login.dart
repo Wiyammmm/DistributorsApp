@@ -187,7 +187,7 @@ class _LoginPageState extends State<LoginPage> {
                                                 type: ArtSweetAlertType.danger,
                                                 title: "Oops...",
                                                 text:
-                                                    "NO INTERNET CONNECTION"));
+                                                    "${isLogin['messages'][0]['message'].toString().toUpperCase()}"));
                                         return;
                                       }
                                       Navigator.of(context).pop();
