@@ -8,8 +8,10 @@ import 'package:distributorsapp/components/modals.dart';
 import 'package:distributorsapp/components/receiptImage.dart';
 import 'package:distributorsapp/components/template.dart';
 import 'package:distributorsapp/components/widgets.dart';
+import 'package:distributorsapp/pages/generatereport.dart';
 import 'package:distributorsapp/pages/home.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:intl/intl.dart';
@@ -97,10 +99,19 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
 
   Future<void> _getTransactionHistory() async {
     DateTime currentDate = DateTime.now();
+    DateTime last7dates = currentDate.subtract(Duration(days: 30));
+    print('currentDate: $currentDate');
     // Set state to trigger rebuild
     userInfo = _myBox.get('userInfo');
     final responseTransactionHistory =
-        await httprequestService.getTransactionHistory("${userInfo['_id']}");
+        await httprequestService.filterGetTransactionHistory({
+      // "filterType": null,
+      // "filterData": null,
+      // "fromDate": last7dates.toIso8601String(),
+      // "toDate": currentDate.toIso8601String(),
+      "pageSize": 20,
+      "pageNumber": 1
+    });
     if (mounted)
       setState(() {
         try {
@@ -311,8 +322,10 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                                           'transactionList[index]: ${transactionList[index]}');
                                       _screenshotController
                                           .captureFromWidget(ReceiptImage(
-                                        thisName:
-                                            "${transactionList[index]['sn']}",
+                                        isFilipayAppActive: isCashInTransaction,
+                                        thisName: isCashInTransaction
+                                            ? "CASHIN"
+                                            : "${transactionList[index]['sn']}",
                                         prevAmount:
                                             "${transactionList[index]['snPreviousBalance']}",
                                         newAmount:
@@ -329,6 +342,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
                                             double.parse(transactionList[index]
                                                     ['snPreviousBalance']
                                                 .toString()),
+                                        isCashin: isCashInTransaction,
                                       ))
                                           .then((capturedImage) async {
                                         print('capturedImage: $capturedImage');
@@ -365,23 +379,31 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
               },
             ),
           ),
-          Container(
-            height: 60,
-            decoration:
-                BoxDecoration(color: Color.fromARGB(200, 255, 255, 255)),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Generate Report',
-                  style: TextStyle(
-                      color: Colors.blue, fontWeight: FontWeight.bold),
-                ),
-                Icon(
-                  Icons.list_alt_rounded,
-                  color: Colors.blue,
-                )
-              ],
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => GenerateReport()),
+              );
+            },
+            child: Container(
+              height: 60,
+              decoration:
+                  BoxDecoration(color: Color.fromARGB(200, 255, 255, 255)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Generate Report',
+                    style: TextStyle(
+                        color: Colors.blue, fontWeight: FontWeight.bold),
+                  ),
+                  Icon(
+                    Icons.list_alt_rounded,
+                    color: Colors.blue,
+                  )
+                ],
+              ),
             ),
           ),
         ]),

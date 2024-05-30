@@ -11,7 +11,8 @@ class ReceiptImage extends StatelessWidget {
       required this.prevAmount,
       required this.newAmount,
       required this.refNum,
-      required this.date});
+      required this.date,
+      required this.isCashin});
   final bool isFilipayAppActive;
   final String thisName;
   final double amount;
@@ -19,6 +20,7 @@ class ReceiptImage extends StatelessWidget {
   final String newAmount;
   final String refNum;
   final String date;
+  final bool isCashin;
 
   @override
   Widget build(BuildContext context) {
@@ -176,6 +178,7 @@ class ReceiptImage extends StatelessWidget {
                               SizedBox(
                                 height: 50,
                               ),
+
                               Image.asset(
                                 "assets/receiptPoweredBy.png",
                                 width: 130,

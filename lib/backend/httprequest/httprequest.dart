@@ -345,6 +345,55 @@ class HttprequestService {
     }
   }
 
+  Future<Map<String, dynamic>> filterGetTransactionHistory(
+      Map<String, dynamic> item) async {
+    Map<String, dynamic> responseRequest = {
+      "messages": [
+        {
+          "code": 500,
+          "message": "SOMETHING WENT WRONG",
+        }
+      ],
+      "response": {}
+    };
+
+    //emmanueltest@token1234
+
+    //print('token: $token');
+
+    try {
+      final response = await http
+          .post(Uri.parse("${Config.filterTransctionHistoryUrl}"),
+              headers: {
+                'Authorization': 'Bearer ${Config.bearerTokenapi}',
+                'Content-Type': 'application/json',
+                // Add other headers if needed`
+              },
+              body: jsonEncode(item))
+          .timeout(Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        // Successful response
+        responseRequest = json.decode(response.body);
+        print('filterGetTransactionHistory response: $responseRequest');
+        if (responseRequest['messages'][0]['code'].toString() == "0") {
+          return responseRequest;
+        } else {
+          return responseRequest;
+        }
+      } else {
+        // Handle error responses
+        print(
+            'filterGetTransactionHistory response Error: ${response.statusCode}');
+        print('filterGetTransactionHistory Response body: ${response.body}');
+        return responseRequest;
+      }
+    } catch (e) {
+      print("filterGetTransactionHistory error: $e");
+      return responseRequest;
+    }
+  }
+
   Future<Map<String, dynamic>> checkRefNum(String id) async {
     Map<String, dynamic> responseRequest = {
       "messages": [

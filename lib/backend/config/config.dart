@@ -34,6 +34,8 @@ class Config {
   static const liveApiToken =
       "LIVE-enP2NU1GIIwfnMjhOhYXrjblBtWRHNYGhZzJ4TKfJnbKUZm3Thnx2O0iRKG5IdOe";
 
+  static const filterTransctionHistoryUrl =
+      "http://172.232.77.205:3003/api/v1/distributor/transactionhistory/filter/data";
   static const bearerTokenapi = "emmanueltest@token1234";
   static const isLive = false;
   static const username = "filipay123";

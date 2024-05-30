@@ -12,14 +12,15 @@ import 'package:flutter/material.dart';
 import 'package:idle_detector_wrapper/idle_detector_wrapper.dart';
 
 class pageTemplate extends StatelessWidget {
-  const pageTemplate({
-    super.key,
-    required this.thiswidget,
-    required this.haveappbar,
-  });
+  const pageTemplate(
+      {super.key,
+      required this.thiswidget,
+      required this.haveappbar,
+      this.floatingActionButton = const SizedBox()});
 
   final Widget thiswidget;
   final bool haveappbar;
+  final Widget floatingActionButton;
 
   @override
   Widget build(BuildContext context) {
@@ -342,6 +343,9 @@ class pageTemplate extends StatelessWidget {
             ),
           )
         : Scaffold(
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+            floatingActionButton: floatingActionButton,
             body: SafeArea(
               child: Container(
                   decoration: BoxDecoration(color: Color(0xfff2f2f2)),
