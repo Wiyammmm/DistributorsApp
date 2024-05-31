@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "33942190250",
+    "project_id": "distributors-8f4e1",
+    "storage_bucket": "distributors-8f4e1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:33942190250:android:1d236e479564884e39b8d3",
+        "android_client_info": {
+          "package_name": "com.example.distributorsapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoktIUc-cipuLyDdcRhVsU070ZtrHVA04"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

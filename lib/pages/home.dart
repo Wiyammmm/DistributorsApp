@@ -3,11 +3,14 @@ import 'package:distributorsapp/backend/get/getValueServices.dart';
 import 'package:distributorsapp/backend/httprequest/httprequest.dart';
 import 'package:distributorsapp/backend/printer/connectToPrinter.dart';
 import 'package:distributorsapp/components/color.dart';
+import 'package:distributorsapp/components/notif_screen.dart';
 import 'package:distributorsapp/components/template.dart';
+import 'package:distributorsapp/main.dart';
 import 'package:distributorsapp/pages/cashin.dart';
 import 'package:distributorsapp/pages/checkbalance.dart';
 import 'package:distributorsapp/pages/load.dart';
 import 'package:distributorsapp/pages/transactionhistory.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -21,6 +24,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   HttprequestService httprequestService = HttprequestService();
   PrinterController connectToPrinter = PrinterController();
   final _myBox = Hive.box('myBox');
@@ -31,6 +35,33 @@ class _HomePageState extends State<HomePage> {
     userInfo = _myBox.get('userInfo');
     _connectToPrinter();
     getUserInfo();
+
+    // _firebaseMessaging.requestPermission(
+    //     alert: true, announcement: true, badge: true, sound: true);
+    // print('_firebaseMessaging: ${_firebaseMessaging.app}');
+    // FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    //   print('Got a message whilst in the foreground!');
+    //   print('Message data: ${message.data}');
+
+    //   if (message.notification != null) {
+    //     print('Message also contained a notification: ${message.notification}');
+    //   }
+
+    //   navigatorKey.currentState?.push(MaterialPageRoute(
+    //       builder: (context) => NotificationScreen(
+    //             title: message.notification?.title ?? 'Notification',
+    //             body: message.notification?.body ?? 'No message body',
+    //           )));
+    // });
+
+    // FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    //   print('Message clicked!');
+    //   navigatorKey.currentState?.push(MaterialPageRoute(
+    //       builder: (context) => NotificationScreen(
+    //             title: message.notification?.title ?? 'Notification',
+    //             body: message.notification?.body ?? 'No message body',
+    //           )));
+    // });
     super.initState();
   }
 
