@@ -1,4 +1,5 @@
 import 'package:art_sweetalert/art_sweetalert.dart';
+import 'package:distributorsapp/backend/controllers/notification_service.dart';
 import 'package:distributorsapp/backend/get/getValueServices.dart';
 import 'package:distributorsapp/backend/httprequest/httprequest.dart';
 import 'package:distributorsapp/backend/printer/connectToPrinter.dart';
@@ -33,6 +34,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     userInfo = _myBox.get('userInfo');
+
+    PushNotifications.getDeviceToken();
     _connectToPrinter();
     getUserInfo();
 

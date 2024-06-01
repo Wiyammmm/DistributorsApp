@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 
 class NotificationScreen extends StatelessWidget {
-  final String title;
-  final String body;
+  const NotificationScreen({super.key});
 
-  NotificationScreen({required this.title, required this.body});
-
+  static const route = '/notification-screen';
   @override
   Widget build(BuildContext context) {
+    final message = ModalRoute.of(context)!.settings.arguments;
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text('Push notification'),
       ),
       body: Center(
-        child: Text(body),
+        child: Column(
+          children: [Text('${message}')],
+        ),
       ),
     );
   }
